@@ -74,7 +74,7 @@ func subscribeCallbackLog(client mqtt.Client, msg mqtt.Message) {
 }
 
 func subscribeCallbackCSV(client mqtt.Client, msg mqtt.Message) {
-	fmt.Printf("%s,%d,%v,%q",
+	fmt.Printf("%s,%d,%v,%q\n",
 		msg.Topic(),
 		msg.Qos(),
 		msg.Retained(),

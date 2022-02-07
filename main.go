@@ -68,8 +68,9 @@ func main() {
 		mqtt.NewClientOptions().
 			AddBroker(cfg.MQTTBroker).
 			SetClientID(cfg.MQTTClientID).
-			SetUsername(cfg.MQTTUser).
-			SetPassword(cfg.MQTTPass),
+			SetKeepAlive(cfg.MQTTTimeout).
+			SetPassword(cfg.MQTTPass).
+			SetUsername(cfg.MQTTUser),
 	)
 
 	tok := client.Connect()

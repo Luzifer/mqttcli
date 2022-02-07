@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -9,17 +10,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func mqttTokenToError(tok mqtt.Token) error {
+	if !tok.WaitTimeout(cfg.MQTTTimeout) {
+		return errors.New("token wait timed out")
+	}
+
+	return tok.Error()
+}
+
 func publish(client mqtt.Client) error {
 	for _, t := range cfg.Topics {
-		tok := client.Publish(t, byte(cfg.QOS), cfg.Retain, cfg.Message)
-
 		logger := log.WithField("topic", t)
 
-		if !tok.WaitTimeout(cfg.MQTTTimeout) {
-			logger.Error("Unable to publish message within timeout")
-		}
-
-		if err := tok.Error(); err != nil {
+		if err := mqttTokenToError(client.Publish(t, byte(cfg.QOS), cfg.Retain, cfg.Message)); err != nil {
 			logger.WithError(err).Fatal("Unable to publish message")
 		}
 
@@ -54,8 +57,7 @@ func subscribe(client mqtt.Client) error {
 		log.WithField("format", cfg.OutputFormat).Fatal("Invalid output format specified")
 	}
 
-	tok := client.SubscribeMultiple(topics, callback)
-	if err := tok.Error(); err != nil {
+	if err := mqttTokenToError(client.SubscribeMultiple(topics, callback)); err != nil {
 		log.WithError(err).Fatal("Unable to subscribe topics")
 	}
 

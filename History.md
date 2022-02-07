@@ -1,3 +1,9 @@
+# 0.3.0 / 2022-02-07
+
+  * Set connection lost handler to exit subscription mode
+  * Add keepalive
+  * CI: Tidy mod-file, auto-publish releases
+
 # 0.2.0 / 2022-02-07
 
   * Upgrade dependencies

@@ -68,6 +68,9 @@ func main() {
 		mqtt.NewClientOptions().
 			AddBroker(cfg.MQTTBroker).
 			SetClientID(cfg.MQTTClientID).
+			SetConnectionLostHandler(func(_ mqtt.Client, err error) {
+				log.WithError(err).Fatal("Connection to broker lost")
+			}).
 			SetKeepAlive(cfg.MQTTTimeout).
 			SetPassword(cfg.MQTTPass).
 			SetUsername(cfg.MQTTUser),

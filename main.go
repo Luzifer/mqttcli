@@ -81,10 +81,6 @@ func main() {
 
 	switch cmd {
 	case "pub":
-		if cfg.Message == "" {
-			log.Fatal("Empty message on publish")
-		}
-
 		if err := publish(client); err != nil {
 			log.WithError(err).Fatal("Failed to publish message")
 		}

@@ -7,6 +7,7 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gofrs/uuid"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/Luzifer/rconfig/v2"
@@ -31,7 +32,7 @@ var (
 	version = "dev"
 )
 
-func init() {
+func initApp() error {
 	rconfig.AutoEnv(true)
 
 	rconfig.SetVariableDefaults(map[string]string{
@@ -39,22 +40,29 @@ func init() {
 	})
 
 	if err := rconfig.ParseAndValidate(&cfg); err != nil {
-		log.Fatalf("Unable to parse commandline options: %s", err)
+		return errors.Wrap(err, "parsing CLI options")
 	}
 
-	if cfg.VersionAndExit {
-		fmt.Printf("mqttcli %s\n", version)
-		os.Exit(0)
+	l, err := log.ParseLevel(cfg.LogLevel)
+	if err != nil {
+		return errors.Wrap(err, "parsing log-level")
 	}
+	log.SetLevel(l)
 
-	if l, err := log.ParseLevel(cfg.LogLevel); err != nil {
-		log.WithError(err).Fatal("Unable to parse log level")
-	} else {
-		log.SetLevel(l)
-	}
+	return nil
 }
 
 func main() {
+	var err error
+	if err = initApp(); err != nil {
+		log.WithError(err).Fatal("initializing app")
+	}
+
+	if cfg.VersionAndExit {
+		fmt.Printf("mqttcli %s\n", version) //nolint:forbidigo
+		os.Exit(0)
+	}
+
 	var cmd string
 	if len(rconfig.Args()) > 1 {
 		cmd = rconfig.Args()[1]

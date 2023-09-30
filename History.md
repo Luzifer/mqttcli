@@ -1,3 +1,8 @@
+# 0.3.1 / 2023-09-30
+
+  * Update dependencies, fix linter errors
+  * CI: Replace repo-runner CI
+
 # 0.3.0 / 2022-02-07
 
   * Set connection lost handler to exit subscription mode

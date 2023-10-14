@@ -1,3 +1,7 @@
+# 0.3.2 / 2023-10-14
+
+  * Update dependencies
+
 # 0.3.1 / 2023-09-30
 
   * Update dependencies, fix linter errors

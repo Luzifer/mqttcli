@@ -1,6 +1,12 @@
 publish:
-	curl -sSLo golang.sh https://raw.githubusercontent.com/Luzifer/github-publish/master/golang.sh
-	bash golang.sh
+	bash ./ci/build.sh
+
+build:
+	go build \
+		-buildvcs=false \
+		-ldflags "-s -w -buildid= -X main.version=$(PRODUCT_VERSION)" \
+		-mod=readonly \
+		-trimpath
 
 # -- Vulnerability scanning --
 

@@ -1,10 +1,7 @@
----
-
 name: test-and-build
+
 on:
-  push:
-    branches: ['*']
-    tags: ['v*']
+  push: {}
 
 permissions:
   contents: write
@@ -16,7 +13,7 @@ jobs:
         shell: bash
 
     container:
-      image: luzifer/archlinux
+      image: ghcr.io/luzifer-docker/action-env:master@sha256:308d4d9be363169a725b5ffa8de3027f7ec507d6241588d1dcd5c077c77acbd1
       env:
         CGO_ENABLED: 0
         GOPATH: /go
@@ -24,25 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Enable custom AUR package repo
-        run: echo -e "[luzifer]\nSigLevel = Never\nServer = https://archrepo.hub.luzifer.io/\$arch" >>/etc/pacman.conf
-
-      - name: Install required packages
-        run: |
-          pacman -Syy --noconfirm \
-            awk \
-            git \
-            go \
-            golangci-lint-bin \
-            make \
-            tar \
-            trivy \
-            zip
-
-      - uses: actions/checkout@v3
-
-      - name: Marking workdir safe
-        run: git config --global --add safe.directory /__w/mqttcli/mqttcli
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build release
         run: make publish
@@ -66,5 +45,3 @@ jobs:
           bodyFile: release_changelog.md
           draft: false
           generateReleaseNotes: false
-
-...

@@ -1,0 +1,33 @@
+name: pr-test
+
+on:
+  push: {}
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  pr-test:
+    defaults:
+      run:
+        shell: bash
+
+    container:
+      image: ghcr.io/luzifer-docker/action-env:master@sha256:308d4d9be363169a725b5ffa8de3027f7ec507d6241588d1dcd5c077c77acbd1
+      env:
+        CGO_ENABLED: 0
+        GOPATH: /go
+
+    runs-on: forgejo
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint and test code
+        run: |
+          golangci-lint run ./...
+          go test -v -cover ./...
+
+      - name: Do a quick local compile
+        run: make build

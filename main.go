@@ -23,6 +23,7 @@ var (
 		MQTTTimeout    time.Duration `flag:"mqtt-timeout" default:"10s" description:"How long to wait for the client to complete operations"`
 		OutputFormat   string        `flag:"output-format,o" default:"log" description:"How to ouptut received messages (One of 'log', 'csv', 'jsonl')"`
 		QOS            int           `flag:"qos" default:"1" description:"QOS to use (0 - Only Once, 1 - At Least Once, 2 - Only Once)"`
+		ReceiveOnce    bool          `flag:"receive-once,1" default:"false" description:"Exit after receiving one message"`
 		Retain         bool          `flag:"retain" default:"false" description:"Retain message on topic"`
 		Topics         []string      `flag:"topic,t" default:"" description:"Topic to subscribe / publish to"`
 		VersionAndExit bool          `flag:"version" default:"false" description:"Prints current version and exits"`

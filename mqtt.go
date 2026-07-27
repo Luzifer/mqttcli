@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -36,6 +37,7 @@ func publish(client mqtt.Client) error {
 func subscribe(client mqtt.Client) error {
 	var (
 		callback mqtt.MessageHandler
+		done     chan struct{}
 		topics   = make(map[string]byte)
 	)
 
@@ -58,13 +60,25 @@ func subscribe(client mqtt.Client) error {
 		log.WithField("format", cfg.OutputFormat).Fatal("Invalid output format specified")
 	}
 
+	if cfg.ReceiveOnce {
+		var once sync.Once
+
+		done = make(chan struct{})
+		outputCallback := callback
+		callback = func(client mqtt.Client, msg mqtt.Message) {
+			once.Do(func() {
+				outputCallback(client, msg)
+				close(done)
+			})
+		}
+	}
+
 	if err := mqttTokenToError(client.SubscribeMultiple(topics, callback)); err != nil {
 		log.WithError(err).Fatal("Unable to subscribe topics")
 	}
 
-	for {
-		select {}
-	}
+	<-done
+	return nil
 }
 
 func subscribeCallbackLog(_ mqtt.Client, msg mqtt.Message) {

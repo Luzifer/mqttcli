@@ -23,6 +23,7 @@ Usage of mqttcli:
   -u, --mqtt-user string        Username to identify against the broker
   -o, --output-format string    How to ouptut received messages (One of 'log', 'csv', 'jsonl') (default "log")
       --qos int                 QOS to use (0 - Only Once, 1 - At Least Once, 2 - Only Once) (default 1)
+  -1, --receive-once            Exit after receiving one message
       --retain                  Retain message on topic
   -t, --topic strings           Topic to subscribe / publish to
       --version                 Prints current version and exits
@@ -40,6 +41,10 @@ mysensor/co2,1,false,"3978"
 
 # envrun -- mqttcli sub -t 'mysensor/+' -o jsonl
 {"topic":"mysensor/co2","qos":1,"retained":false,"message":"3972"}
+
+# Receive one retained or newly published message, then exit
+# envrun -- mqttcli sub --receive-once -t 'mysensor/+'
+INFO[0001] Message received                              message=3972 qos=1 retained=true topic=mysensor/co2
 ```
 
 ```console

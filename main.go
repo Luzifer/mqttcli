@@ -1,3 +1,4 @@
+// CLI Util to access MQTT
 package main
 
 import (
@@ -5,12 +6,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/Luzifer/rconfig/v2"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gofrs/uuid"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/Luzifer/rconfig/v2"
 )
 
 var (
@@ -19,8 +18,8 @@ var (
 		Message        string        `flag:"message,m" default:"" description:""`
 		MQTTBroker     string        `flag:"mqtt-broker,b" default:"tcp://localhost:1883" description:"Broker URI to connect to scheme://host:port (scheme is one of 'tcp', 'ssl', or 'ws')"`
 		MQTTClientID   string        `flag:"mqtt-client-id" vardefault:"client-id" description:"Client ID to use when connecting, must be unique"`
-		MQTTUser       string        `flag:"mqtt-user,u" default:"" description:"Username to identify against the broker" validate:"nonzero"`
-		MQTTPass       string        `flag:"mqtt-pass,p" default:"" description:"Password to identify against the broker" validate:"nonzero"`
+		MQTTUser       string        `flag:"mqtt-user,u" default:"" description:"Username to identify against the broker" validate:"nonzero"` //revive:disable-line:struct-tag // nonzero is valid
+		MQTTPass       string        `flag:"mqtt-pass,p" default:"" description:"Password to identify against the broker" validate:"nonzero"` //revive:disable-line:struct-tag // nonzero is valid
 		MQTTTimeout    time.Duration `flag:"mqtt-timeout" default:"10s" description:"How long to wait for the client to complete operations"`
 		OutputFormat   string        `flag:"output-format,o" default:"log" description:"How to ouptut received messages (One of 'log', 'csv', 'jsonl')"`
 		QOS            int           `flag:"qos" default:"1" description:"QOS to use (0 - Only Once, 1 - At Least Once, 2 - Only Once)"`
@@ -40,12 +39,12 @@ func initApp() error {
 	})
 
 	if err := rconfig.ParseAndValidate(&cfg); err != nil {
-		return errors.Wrap(err, "parsing CLI options")
+		return fmt.Errorf("parsing CLI options: %w", err)
 	}
 
 	l, err := log.ParseLevel(cfg.LogLevel)
 	if err != nil {
-		return errors.Wrap(err, "parsing log-level")
+		return fmt.Errorf("parsing log-level: %w", err)
 	}
 	log.SetLevel(l)
 
@@ -59,7 +58,7 @@ func main() {
 	}
 
 	if cfg.VersionAndExit {
-		fmt.Printf("mqttcli %s\n", version) //nolint:forbidigo
+		fmt.Printf("mqttcli %s\n", version) //nolint:forbidigo // fine for version print
 		os.Exit(0)
 	}
 

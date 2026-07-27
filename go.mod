@@ -1,12 +1,11 @@
 module github.com/Luzifer/mqttcli
 
-go 1.21
+go 1.26.0
 
 require (
 	github.com/Luzifer/rconfig/v2 v2.4.0
 	github.com/eclipse/paho.mqtt.golang v1.4.3
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
 )
 

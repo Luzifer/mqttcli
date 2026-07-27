@@ -22,6 +22,7 @@ func publish(client mqtt.Client) error {
 	for _, t := range cfg.Topics {
 		logger := log.WithField("topic", t)
 
+		//#nosec:G115 // QOS is expected to be 0,1,2 - fine to convert
 		if err := mqttTokenToError(client.Publish(t, byte(cfg.QOS), cfg.Retain, cfg.Message)); err != nil {
 			logger.WithError(err).Fatal("Unable to publish message")
 		}
@@ -35,11 +36,11 @@ func publish(client mqtt.Client) error {
 func subscribe(client mqtt.Client) error {
 	var (
 		callback mqtt.MessageHandler
-		topics   = map[string]byte{}
+		topics   = make(map[string]byte)
 	)
 
 	for _, t := range cfg.Topics {
-		topics[t] = byte(cfg.QOS)
+		topics[t] = byte(cfg.QOS) //#nosec:G115 // QOS is expected to be 0,1,2 - fine to convert
 	}
 
 	switch cfg.OutputFormat {
@@ -47,7 +48,7 @@ func subscribe(client mqtt.Client) error {
 		callback = subscribeCallbackLog
 
 	case "csv":
-		fmt.Println("Topic,QOS,Retained,Message") //nolint:forbidigo
+		fmt.Println("Topic,QOS,Retained,Message") //nolint:forbidigo // fine for CSV print
 		callback = subscribeCallbackCSV
 
 	case "jsonl":
@@ -76,7 +77,9 @@ func subscribeCallbackLog(_ mqtt.Client, msg mqtt.Message) {
 }
 
 func subscribeCallbackCSV(_ mqtt.Client, msg mqtt.Message) {
-	fmt.Printf("%s,%d,%v,%q\n", //nolint:forbidigo
+	//nolint:forbidigo // fine for CSV print
+	fmt.Printf(
+		"%s,%d,%v,%q\n",
 		msg.Topic(),
 		msg.Qos(),
 		msg.Retained(),

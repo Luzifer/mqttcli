@@ -1,15 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"os"
-	"sync"
-	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	log "github.com/sirupsen/logrus"
 )
 
 func mqttTokenToError(tok mqtt.Token) error {
@@ -18,113 +12,4 @@ func mqttTokenToError(tok mqtt.Token) error {
 	}
 
 	return tok.Error() //nolint:wrapcheck // fine in this case, only used in logging
-}
-
-func publish(client mqtt.Client) error {
-	for _, t := range cfg.Topics {
-		logger := log.WithField("topic", t)
-
-		//#nosec:G115 // QOS is expected to be 0,1,2 - fine to convert
-		if err := mqttTokenToError(client.Publish(t, byte(cfg.QOS), cfg.Retain, cfg.Message)); err != nil {
-			logger.WithError(err).Fatal("Unable to publish message")
-		}
-
-		logger.Info("Message published")
-	}
-
-	return nil
-}
-
-func subscribe(client mqtt.Client) error {
-	var (
-		callback mqtt.MessageHandler
-		done     chan struct{}
-		timeout  <-chan time.Time
-		topics   = make(map[string]byte)
-	)
-
-	for _, t := range cfg.Topics {
-		topics[t] = byte(cfg.QOS) //#nosec:G115 // QOS is expected to be 0,1,2 - fine to convert
-	}
-
-	switch cfg.OutputFormat {
-	case "log":
-		callback = subscribeCallbackLog
-
-	case "csv":
-		fmt.Println("Topic,QOS,Retained,Message") //nolint:forbidigo // fine for CSV print
-		callback = subscribeCallbackCSV
-
-	case "jsonl":
-		callback = subscribeCallbackJSONL
-
-	default:
-		log.WithField("format", cfg.OutputFormat).Fatal("Invalid output format specified")
-	}
-
-	if cfg.ReceiveOnce {
-		var once sync.Once
-
-		done = make(chan struct{})
-		outputCallback := callback
-		callback = func(client mqtt.Client, msg mqtt.Message) {
-			once.Do(func() {
-				outputCallback(client, msg)
-				close(done)
-			})
-		}
-	}
-
-	if err := mqttTokenToError(client.SubscribeMultiple(topics, callback)); err != nil {
-		log.WithError(err).Fatal("Unable to subscribe topics")
-	}
-
-	if cfg.Timeout > 0 {
-		timeout = time.NewTimer(cfg.Timeout).C
-	}
-
-	select {
-	case <-done:
-	case <-timeout:
-	}
-
-	return nil
-}
-
-func subscribeCallbackLog(_ mqtt.Client, msg mqtt.Message) {
-	log.WithFields(log.Fields{
-		"topic":    msg.Topic(),
-		"qos":      msg.Qos(),
-		"retained": msg.Retained(),
-		"message":  string(msg.Payload()),
-	}).Info("Message received")
-}
-
-func subscribeCallbackCSV(_ mqtt.Client, msg mqtt.Message) {
-	//nolint:forbidigo // fine for CSV print
-	fmt.Printf(
-		"%s,%d,%v,%q\n",
-		msg.Topic(),
-		msg.Qos(),
-		msg.Retained(),
-		string(msg.Payload()),
-	)
-}
-
-func subscribeCallbackJSONL(_ mqtt.Client, msg mqtt.Message) {
-	jsonMessage := struct {
-		Topic    string `json:"topic"`
-		QOS      byte   `json:"qos"`
-		Retained bool   `json:"retained"`
-		Message  string `json:"message"`
-	}{
-		msg.Topic(),
-		msg.Qos(),
-		msg.Retained(),
-		string(msg.Payload()),
-	}
-
-	if err := json.NewEncoder(os.Stdout).Encode(jsonMessage); err != nil {
-		log.WithError(err).Fatal("Unable to marshal message into jsonl")
-	}
 }

@@ -15,14 +15,14 @@ import (
 var (
 	cfg = struct {
 		LogLevel       string        `flag:"log-level" default:"info" description:"Log level (debug, info, warn, error, fatal)"`
-		Message        string        `flag:"message,m" default:"" description:""`
+		Message        string        `flag:"message,m" default:"" description:"Message to publish to the topic"`
 		MQTTBroker     string        `flag:"mqtt-broker,b" default:"tcp://localhost:1883" description:"Broker URI to connect to scheme://host:port (scheme is one of 'tcp', 'ssl', or 'ws')"`
 		MQTTClientID   string        `flag:"mqtt-client-id" vardefault:"client-id" description:"Client ID to use when connecting, must be unique"`
 		MQTTUser       string        `flag:"mqtt-user,u" default:"" description:"Username to identify against the broker" validate:"nonzero"` //revive:disable-line:struct-tag // nonzero is valid
 		MQTTPass       string        `flag:"mqtt-pass,p" default:"" description:"Password to identify against the broker" validate:"nonzero"` //revive:disable-line:struct-tag // nonzero is valid
 		MQTTTimeout    time.Duration `flag:"mqtt-timeout" default:"10s" description:"How long to wait for the client to complete operations"`
-		OutputFormat   string        `flag:"output-format,o" default:"log" description:"How to ouptut received messages (One of 'log', 'csv', 'jsonl')"`
-		QOS            int           `flag:"qos" default:"1" description:"QOS to use (0 - Only Once, 1 - At Least Once, 2 - Only Once)"`
+		OutputFormat   string        `flag:"output-format,o" default:"log" description:"How to output received messages (One of 'log', 'csv', 'jsonl')"`
+		QOS            int           `flag:"qos" default:"1" description:"QoS to use (0 - At most once, 1 - At least once, 2 - Exactly once)"`
 		ReceiveOnce    bool          `flag:"receive-once,1" default:"false" description:"Exit after receiving one message"`
 		Retain         bool          `flag:"retain" default:"false" description:"Retain message on topic"`
 		Timeout        time.Duration `flag:"timeout" default:"0" description:"How long to listen for messages (0 = infinite)"`

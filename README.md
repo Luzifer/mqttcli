@@ -1,13 +1,12 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/Luzifer/mqttcli)](https://goreportcard.com/report/github.com/Luzifer/mqttcli)
-![](https://badges.fyi/github/license/Luzifer/mqttcli)
-![](https://badges.fyi/github/downloads/Luzifer/mqttcli)
-![](https://badges.fyi/github/latest-release/Luzifer/mqttcli)
+![](https://img.shields.io/github/license/Luzifer/mqttcli)
+![](https://img.shields.io/github/downloads/Luzifer/mqttcli/total)
+![](https://img.shields.io/github/v/release/Luzifer/mqttcli)
 
 # Luzifer / mqttcli
 
-`mqttcli` is a small CLI util to interface with a MQTT server. It can be used to publish messages to oder subscribe messages from a MQTT server.
+`mqttcli` is a small command-line client for publishing messages to and subscribing to topics on an MQTT broker.
 
-At the moment it is intended to connect to simple setups using plain `tcp`, `ssl` with trusted certificates or websockets (`ws`). More options to come later.
+Connections can use plain TCP (`tcp`), TLS with trusted server certificates (`ssl`), or WebSockets (`ws`).
 
 ## Usage
 
@@ -15,16 +14,17 @@ At the moment it is intended to connect to simple setups using plain `tcp`, `ssl
 # mqttcli --help
 Usage of mqttcli:
       --log-level string        Log level (debug, info, warn, error, fatal) (default "info")
-  -m, --message string          
+  -m, --message string          Message to publish to the topic
   -b, --mqtt-broker string      Broker URI to connect to scheme://host:port (scheme is one of 'tcp', 'ssl', or 'ws') (default "tcp://localhost:1883")
-      --mqtt-client-id string   Client ID to use when connecting, must be unique (default "21064ab7-c296-445e-b8b6-d1bced77853c")
+      --mqtt-client-id string   Client ID to use when connecting, must be unique (default "4a977ad1-474a-4773-8ec5-da950bcd6758")
   -p, --mqtt-pass string        Password to identify against the broker
       --mqtt-timeout duration   How long to wait for the client to complete operations (default 10s)
   -u, --mqtt-user string        Username to identify against the broker
-  -o, --output-format string    How to ouptut received messages (One of 'log', 'csv', 'jsonl') (default "log")
-      --qos int                 QOS to use (0 - Only Once, 1 - At Least Once, 2 - Only Once) (default 1)
+  -o, --output-format string    How to output received messages (One of 'log', 'csv', 'jsonl') (default "log")
+      --qos int                 QoS to use (0 - At most once, 1 - At least once, 2 - Exactly once) (default 1)
   -1, --receive-once            Exit after receiving one message
       --retain                  Retain message on topic
+      --timeout duration        How long to listen for messages (0 = infinite)
   -t, --topic strings           Topic to subscribe / publish to
       --version                 Prints current version and exits
 ```
@@ -32,24 +32,24 @@ Usage of mqttcli:
 ## Examples
 
 ```console
-# envrun -- mqttcli sub -t 'mysensor/+'
+# mqttcli sub -t 'mysensor/+'
 INFO[0001] Message received                              message=4058 qos=1 retained=false topic=mysensor/co2
 
-# envrun -- mqttcli sub -t 'mysensor/+' -o csv
+# mqttcli sub -t 'mysensor/+' -o csv
 Topic,QOS,Retained,Message
 mysensor/co2,1,false,"3978"
 
-# envrun -- mqttcli sub -t 'mysensor/+' -o jsonl
+# mqttcli sub -t 'mysensor/+' -o jsonl
 {"topic":"mysensor/co2","qos":1,"retained":false,"message":"3972"}
 
 # Receive one retained or newly published message, then exit
-# envrun -- mqttcli sub --receive-once -t 'mysensor/+'
+# mqttcli sub --receive-once -t 'mysensor/+'
 INFO[0001] Message received                              message=3972 qos=1 retained=true topic=mysensor/co2
 ```
 
 ```console
-# envrun -- mqttcli pub -t mysensor/test -m 'ohai?'
+# mqttcli pub -t mysensor/test -m 'ohai?'
 
-# envrun -- mqttcli sub -t 'mysensor/+'
+# mqttcli sub -t 'mysensor/+'
 INFO[0001] Message received                              message="ohai?" qos=1 retained=false topic=mysensor/test
 ```

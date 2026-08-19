@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -38,6 +39,7 @@ func subscribe(client mqtt.Client) error {
 	var (
 		callback mqtt.MessageHandler
 		done     chan struct{}
+		timeout  <-chan time.Time
 		topics   = make(map[string]byte)
 	)
 
@@ -77,7 +79,15 @@ func subscribe(client mqtt.Client) error {
 		log.WithError(err).Fatal("Unable to subscribe topics")
 	}
 
-	<-done
+	if cfg.Timeout > 0 {
+		timeout = time.NewTimer(cfg.Timeout).C
+	}
+
+	select {
+	case <-done:
+	case <-timeout:
+	}
+
 	return nil
 }
 

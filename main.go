@@ -25,6 +25,7 @@ var (
 		QOS            int           `flag:"qos" default:"1" description:"QOS to use (0 - Only Once, 1 - At Least Once, 2 - Only Once)"`
 		ReceiveOnce    bool          `flag:"receive-once,1" default:"false" description:"Exit after receiving one message"`
 		Retain         bool          `flag:"retain" default:"false" description:"Retain message on topic"`
+		Timeout        time.Duration `flag:"timeout" default:"0" description:"How long to listen for messages (0 = infinite)"`
 		Topics         []string      `flag:"topic,t" default:"" description:"Topic to subscribe / publish to"`
 		VersionAndExit bool          `flag:"version" default:"false" description:"Prints current version and exits"`
 	}{}

@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/Luzifer/rconfig/v2 v2.6.3
-	github.com/eclipse/paho.mqtt.golang v1.5.1
+	github.com/eclipse/paho.mqtt.golang v1.5.2
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/sirupsen/logrus v1.10.2
 )
